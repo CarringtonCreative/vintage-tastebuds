@@ -8,6 +8,7 @@ const BOARD = [
   [".", ".", "."],
   [".", ".", "."],
 ];
+
 // xox -> 1, 1, 1
 // xox -> 1, 0, 1
 // ooo -> 0, 0, 0
@@ -20,37 +21,40 @@ const BOARD = [
 // xox -> 1, 1, 1
 // xx. -> 1, 0, 1
 
-const isValid = (r, c, board) => {
-  const validRow = r >= 0 && r < board.length;
-  const validCol = c >= 0 && board[r] && c < board[r].length;
+const isValid = (row, col, board) => {
+  const validRow = row >= 0 && row < board.length;
+  const validCol = col >= 0 && board[row] && col < board[row].length;
   return validRow && validCol;
 };
 
-const isDone = (r, c, board) => {
-  if (!r || !c) {
-    return true;
-  }
-  const lastRow = r == board.length;
-  const lastCol = c == board[r].length;
+const isDone = (row, col, board) => {
+  console.log("isDone", row, col);
+
+  if (row === undefined || col === undefined) return true;
+
+  const lastRow = row == board.length;
+  const lastCol = col == board[row] && board[row].length;
+
   return lastRow && lastCol;
 };
 
-const isRowEnd = (row, board) => {
-  return row == board[row].length - 1;
+const isRowEnd = (row, col, board) => {
+  return col == board[row].length - 1;
 };
 
-const getNextMove = (r, c, board) => {
-  const valid = isValid(r, c, board);
-  const rowEnd = isRowEnd(r, board);
+const getNextMove = (row, col, board) => {
+  const valid = isValid(row, col, board);
+  const rowEnd = isRowEnd(row, col, board);
+  console.log(valid, rowEnd);
   if (valid) {
     if (rowEnd) {
-      r = 0;
-      c++;
+      col = 0;
+      row++;
     } else {
-      r++;
+      col++;
     }
   }
-  return { row: r, col: c };
+  return { row, col };
 };
 
 const viewBoard = (board) => {
@@ -61,12 +65,12 @@ const viewBoard = (board) => {
   while (validMove) {
     const element = board[row][col];
     output += element + " ";
-    if (row == board[row].length - 1) {
+    if (col == board[row].length - 1) {
       output += "\n";
-      row = 0;
-      col++;
-    } else {
+      col = 0;
       row++;
+    } else {
+      col++;
     }
     validMove = isValid(row, col, board);
   }
@@ -74,23 +78,25 @@ const viewBoard = (board) => {
 };
 
 const playGame = (board) => {
-  let r = 0;
-  let c = 0;
+  let row = 0;
+  let col = 0;
   let done = false;
   let turn = PLAYER.X;
   while (!done) {
+    console.log(board);
+
     if (turn == PLAYER.X) {
-      board[r][c] = PLAYER.X;
+      board[row][col] = PLAYER.X;
       turn = PLAYER.O;
     } else if (turn == PLAYER.O) {
-      board[r][c] = PLAYER.O;
+      board[row][col] = PLAYER.O;
       turn = PLAYER.X;
     }
-    let { row, col } = getNextMove(r, c, board);
-    console.log(row, col);
-    r = row;
-    c = col;
-    done = isDone(r, c, board);
+    let position = getNextMove(row, col, board);
+    row = position.row;
+    col = position.col;
+    done = isDone(row, col, board);
+    console.log(position, done);
   }
   return board;
 };
